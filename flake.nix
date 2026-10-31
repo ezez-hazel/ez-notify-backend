@@ -18,8 +18,9 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, fenix, crane, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+    let
+      perSystem = flake-utils.lib.eachDefaultSystem (system:
+        let
         pkgs = import nixpkgs {
           inherit system;
         };
@@ -57,34 +58,36 @@
         ezNotify = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
         });
-      in
-      {
-        # 定义 nix包（执行 `nix build` 时构建的内容）
-        packages.${system}.default = ezNotify;
+        in
+        {
+          # 定义 nix包（执行 `nix build` 时构建的内容）
+          packages.default = ezNotify;
 
-        # 导出 NixOS 模块，并将 ezNotify 作为参数透传给 Service
-        nixosModules.default = { pkgs, ... }: {
-          imports = [
-            ./modules/ez-notify.nix
-          ];
+          # 定义开发环境（执行 `nix develop` 或通过 direnv 进入的环境）
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [ ezNotify ];
 
-          _module.args.ezNotifyPackage =
-            self.packages.${pkgs.system}.default;
-        };
+            packages = [
+              rustToolchain
+              pkgs.cargo-edit   # 方便用命令行管理依赖（cargo add/rm）
+              pkgs.cargo-outdated
+            ];
 
-        # 定义开发环境（执行 `nix develop` 或通过 direnv 进入的环境）
-        devShells.default = pkgs.mkShell {
-          inputsFrom = [ ezNotify ];
+            # 设置一些环境变量（可选）
+            RUST_BACKTRACE = "1";
+          };
+        }
+      );
+    in
+    perSystem // {
+      # 导出 NixOS 模块，并将对应系统的包透传给 Service
+      nixosModules.default = { pkgs, ... }: {
+        imports = [
+          ./modules/ez-notify.nix
+        ];
 
-          packages = [
-            rustToolchain
-            pkgs.cargo-edit   # 方便用命令行管理依赖（cargo add/rm）
-            pkgs.cargo-outdated
-          ];
-
-          # 设置一些环境变量（可选）
-          RUST_BACKTRACE = "1";
-        };
-      }
-    );
+        _module.args.ezNotifyPackage =
+          self.packages.${pkgs.system}.default;
+      };
+    };
 }
