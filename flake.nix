@@ -63,11 +63,13 @@
         packages.${system}.default = ezNotify;
 
         # 导出 NixOS 模块，并将 ezNotify 作为参数透传给 Service
-        nixosModules.default = { config, lib, pkgs, ... }: {
-          imports = [ ./modules/ez-notify.nix ];
+        nixosModules.default = { pkgs, ... }: {
+          imports = [
+            ./modules/ez-notify.nix
+          ];
 
-          # 将打包好的 package 注入到 module 作用域或服务配置中
-          config._module.args.ezNotifyPackage = ezNotify;
+          _module.args.ezNotifyPackage =
+            self.packages.${pkgs.system}.default;
         };
 
         # 定义开发环境（执行 `nix develop` 或通过 direnv 进入的环境）
