@@ -12,7 +12,7 @@
       "fenix.cachix.org-1:ecJhr+RdYEdcVgUkjruiYhjbBloIEGov7bos90cZi0Q="
       "crane.cachix.org-1:8Scfpmn9w+hGdXH/Q9tTLiYAE/2dnJYRJP7kl80GuRk="
     ];
-  }
+  };
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
