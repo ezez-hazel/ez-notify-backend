@@ -1,6 +1,19 @@
 {
   description = "EZ Notify - The next generation of bilibili notification";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org/"
+      "https://fenix.cachix.org"
+      "https://crane.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "fenix.cachix.org-1:ecJhr+RdYEdcVgUkjruiYhjbBloIEGov7bos90cZi0Q="
+      "crane.cachix.org-1:8Scfpmn9w+hGdXH/Q9tTLiYAE/2dnJYRJP7kl80GuRk="
+    ];
+  }
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
@@ -25,14 +38,10 @@
           inherit system;
         };
 
-        # 选择 Rust 工具链（这里选择稳定版 stable，你可以根据需要换成 minimal、complete 或特定版本）
-        rustToolchain = fenix.packages.${system}.complete.withComponents [
+        rustToolchain = fenix.packages.${system}.minimal.withComponents [
           "cargo"
           "rustc"
           "rust-std"
-          "rustfmt"
-          "clippy"
-          "rust-analyzer"
         ];
 
         # 将 crane 与我们选择的工具链结合
