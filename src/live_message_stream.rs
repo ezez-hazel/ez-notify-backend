@@ -139,7 +139,7 @@ impl LiveMessageStream {
         }
 
         let payload = serde_json::to_vec(&auth_info).unwrap();
-        info!("auth_info: {}", serde_json::to_string(&auth_info).unwrap());
+        debug!("auth_info: {}", serde_json::to_string(&auth_info).unwrap());
         Self::make_packet(&payload, 7, 1)
     }
 

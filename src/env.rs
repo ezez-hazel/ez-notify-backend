@@ -8,6 +8,7 @@ pub struct AppConfig {
     pub cloudflare_account_id: String,
     pub notify_d1_database_id: String,
     pub cloudflare_api_token: String,
+    pub is_journal: bool,
 }
 
 static CONFIG: OnceLock<AppConfig> = OnceLock::new();
@@ -20,12 +21,17 @@ impl AppConfig {
             cloudflare_account_id: required_env("CLOUDFLARE_ACCOUNT_ID")?,
             notify_d1_database_id: required_env("NOTIFY_D1_DATABASE_ID")?,
             cloudflare_api_token: required_env("CLOUDFLARE_API_TOKEN")?,
+            is_journal: existed_env("JOURNAL_STREAM"),
         })
     }
 }
 
 fn required_env(name: &str) -> Result<String, String> {
     env::var(name).map_err(|_| format!("缺少必需的环境变量: {name}"))
+}
+
+fn existed_env(name: &str) -> bool {
+    env::var_os(name).is_some()
 }
 
 pub fn init() -> Result<(), String> {

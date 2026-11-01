@@ -13,14 +13,25 @@ use tracing::{error, info};
 async fn main() -> Result<()> {
     env::init().map_err(anyhow::Error::msg)?;
 
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
+    let builder = tracing_subscriber::fmt();
 
     let config = env::get();
+
+    if config.is_journal {
+        // Systemd 下输出所有log并移除格式和时间
+        builder
+            .with_env_filter(tracing_subscriber::EnvFilter::new("debug"))
+            .with_ansi(false)
+            .without_time()
+            .init();
+    } else {
+        builder
+            .with_env_filter(
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+            )
+            .init();
+    }
 
     // 从 Cloudflare D1 查询 UID 列表
     let rows = cf::d1_query(
