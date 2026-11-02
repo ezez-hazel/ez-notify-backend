@@ -317,6 +317,7 @@ dependencies = [
  "tokio-rustls",
  "tracing",
  "tracing-subscriber",
+ "tracing-systemd",
  "url",
  "webpki-roots 0.26.11",
 ]
@@ -1037,7 +1038,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1677,6 +1678,17 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "tracing-systemd"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f42e4b1c19a02bc161e79522bf1a4c43ba987c7a2fd2f7b869a3bd59214688a"
+dependencies = [
+ "nu-ansi-term",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

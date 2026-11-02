@@ -7,28 +7,29 @@ mod live_message_stream;
 mod live_room;
 
 use anyhow::Result;
+use std::io::{self, IsTerminal};
 use tracing::{error, info};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     env::init().map_err(anyhow::Error::msg)?;
 
-    let builder = tracing_subscriber::fmt();
-
     let config = env::get();
 
-    if config.is_journal {
-        // Systemd 下输出所有log并移除格式和时间
-        builder
-            .with_env_filter(tracing_subscriber::EnvFilter::new("debug"))
-            .with_ansi(false)
-            .without_time()
-            .init();
-    } else {
-        builder
+    if io::stdout().is_terminal() {
+        tracing_subscriber::fmt()
             .with_env_filter(
                 tracing_subscriber::EnvFilter::try_from_default_env()
                     .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+            )
+            .init();
+    } else {
+        tracing_subscriber::registry()
+            .with(
+                tracing_systemd::SystemdLayer::stdout()
+                    .with_target(true)
+                    .with_thread_ids(true),
             )
             .init();
     }
