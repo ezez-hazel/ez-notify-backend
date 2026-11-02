@@ -316,8 +316,8 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "tracing",
+ "tracing-journald",
  "tracing-subscriber",
- "tracing-systemd",
  "url",
  "webpki-roots 0.26.11",
 ]
@@ -1652,6 +1652,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tracing-journald"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d3a81ed245bfb62592b1e2bc153e77656d94ee6a0497683a65a12ccaf2438d0"
+dependencies = [
+ "libc",
+ "tracing-core",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "tracing-log"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1678,17 +1689,6 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
-]
-
-[[package]]
-name = "tracing-systemd"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f42e4b1c19a02bc161e79522bf1a4c43ba987c7a2fd2f7b869a3bd59214688a"
-dependencies = [
- "nu-ansi-term",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

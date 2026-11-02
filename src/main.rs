@@ -27,9 +27,7 @@ async fn main() -> Result<()> {
     } else {
         tracing_subscriber::registry()
             .with(
-                tracing_systemd::SystemdLayer::stdout()
-                    .with_target(true)
-                    .with_thread_ids(true),
+                tracing_journald::layer().expect("Cannot init journald logger")
             )
             .init();
     }
