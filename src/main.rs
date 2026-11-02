@@ -27,7 +27,19 @@ async fn main() -> Result<()> {
     } else {
         tracing_subscriber::registry()
             .with(
-                tracing_journald::layer().expect("Cannot init journald logger")
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("debug")),
+            )
+            .with(
+                tracing_journald::layer()
+                    .expect("Cannot init journald logger")
+                    .with_priority_mappings(tracing_journald::PriorityMappings {
+                        error: tracing_journald::Priority::Error,
+                        warn: tracing_journald::Priority::Warning,
+                        info: tracing_journald::Priority::Informational,
+                        debug: tracing_journald::Priority::Debug,
+                        trace: tracing_journald::Priority::Debug,
+                    }),
             )
             .init();
     }
