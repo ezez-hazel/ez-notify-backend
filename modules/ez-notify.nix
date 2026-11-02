@@ -49,6 +49,9 @@ in {
       serviceConfig = {
         User = "root";
         ExecStart = "${ezNotifyPackage}/bin/ez-notify-backend";
+
+        Restart = "on-failure";
+        RestartSec = 5;
       };
       wantedBy = [ "multi-user.target" ];
     };
