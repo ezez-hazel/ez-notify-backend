@@ -2,9 +2,10 @@ mod bili;
 mod bili_wbi;
 mod cf;
 mod env;
-mod ez_notify;
+// mod ez_notify;
 mod live_message_stream;
 mod live_room;
+pub mod service;
 
 use anyhow::Result;
 use std::io::{self, IsTerminal};
@@ -14,6 +15,10 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 #[tokio::main]
 async fn main() -> Result<()> {
     env::init().map_err(anyhow::Error::msg)?;
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .unwrap();
+    service::init().await.map_err(anyhow::Error::msg)?;
 
     let config = env::get();
 
@@ -45,12 +50,12 @@ async fn main() -> Result<()> {
     }
 
     // 从 Cloudflare D1 查询 UID 列表
-    let rows = cf::d1_query(
+    let rows = cf::D1Database::new(
         &config.cloudflare_account_id,
         &config.notify_d1_database_id,
         &config.cloudflare_api_token,
-        "SELECT id FROM notify_items",
     )
+    .query("SELECT id FROM notify_items")
     .await?;
 
     let uids: Vec<i64> = rows

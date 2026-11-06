@@ -7,7 +7,9 @@ pub struct AppConfig {
     pub notify_sign_key: String,
     pub cloudflare_account_id: String,
     pub notify_d1_database_id: String,
+    pub bark_d1_database_id: String,
     pub cloudflare_api_token: String,
+    pub web_push_vapid_subject: String,
 }
 
 static CONFIG: OnceLock<AppConfig> = OnceLock::new();
@@ -19,7 +21,10 @@ impl AppConfig {
             notify_sign_key: required_env("NOTIFY_SIGN_KEY")?,
             cloudflare_account_id: required_env("CLOUDFLARE_ACCOUNT_ID")?,
             notify_d1_database_id: required_env("NOTIFY_D1_DATABASE_ID")?,
+            bark_d1_database_id: required_env("BARK_D1_DATABASE_ID")?,
             cloudflare_api_token: required_env("CLOUDFLARE_API_TOKEN")?,
+            web_push_vapid_subject: env::var("WEB_PUSH_VAPID_SUBJECT")
+                .unwrap_or_else(|_| "mailto:admin@example.com".to_string()),
         })
     }
 }

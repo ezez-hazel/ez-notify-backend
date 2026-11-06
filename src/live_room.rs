@@ -12,8 +12,8 @@ use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use tracing::{error, info, warn};
 
 use crate::bili;
-use crate::ez_notify;
 use crate::live_message_stream::{LiveMessageStream, PayloadHandler};
+use crate::service::{NotificationRequest, send_notification};
 
 /// 直播间共享上下文，供各个消息处理器访问与修改
 #[derive(Clone)]
@@ -275,23 +275,38 @@ impl LiveRoom {
                 let face = ctx.get_face();
                 let room_id = ctx.get_room_id();
                 let uid = ctx.uid;
+                let notification_request = NotificationRequest {
+                    id: uid.try_into().unwrap_or_default(),
+                    body: Some(format!("正在直播：{title_val}")),
+                    title: Some(user_name),
+                    icon: Some(face),
+                    url: Some(format!("https://live.bilibili.com/{room_id}")),
+                    room_id: Some(room_id),
+                    ..Default::default()
+                };
                 tokio::spawn(async move {
-                    let client = reqwest::Client::new();
-                    match ez_notify::send(
-                        &client,
-                        uid,
-                        Some(room_id),
-                        Some(&format!("正在直播：{title_val}")),
-                        Some(&user_name),
-                        Some(&face),
-                        Some(&format!("https://live.bilibili.com/{room_id}")),
-                    )
-                    .await
-                    {
+                    match send_notification(notification_request).await {
                         Ok(resp) => info!("[{uid}] 通知发送成功: {resp}"),
-                        Err(e) => error!("[{uid}] 通知发送失败: {e}"),
+                        Err((_, e)) => error!("[{uid}] 通知发送失败: {e}"),
                     }
                 });
+                // tokio::spawn(async move {
+                //     let client = reqwest::Client::new();
+                //     match ez_notify::send(
+                //         &client,
+                //         uid,
+                //         Some(room_id),
+                //         Some(&format!("正在直播：{title_val}")),
+                //         Some(&user_name),
+                //         Some(&face),
+                //         Some(&format!("https://live.bilibili.com/{room_id}")),
+                //     )
+                //     .await
+                //     {
+                //         Ok(resp) => info!("[{uid}] 通知发送成功: {resp}"),
+                //         Err(e) => error!("[{uid}] 通知发送失败: {e}"),
+                //     }
+                // });
             }
         }
     }

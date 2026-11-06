@@ -32,6 +32,17 @@ in {
       type = types.str;
       description = "D1 database ID, not the database name.";
     };
+
+    cloudflareBarkD1DatabaseId = mkOption {
+      type = types.str;
+      description = "D1 database ID, not the database name.";
+    };
+
+    webpushVapidSubject = mkOption {
+      type = types.str;
+      default = "mailto:admin@example.com"
+      description = "D1 database ID, not the database name.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -44,7 +55,9 @@ in {
         NOTIFY_SIGN_KEY = cfg.notifySignKey;
         CLOUDFLARE_ACCOUNT_ID = cfg.cloudflareAccountId;
         NOTIFY_D1_DATABASE_ID = cfg.cloudflareNotifyD1DatabaseId;
+        BARK_D1_DATABASE_ID = cfg.cloudflareBarkD1DatabaseId;
         CLOUDFLARE_API_TOKEN = cfg.cloudflareApiToken;
+        WEB_PUSH_VAPID_SUBJECT = cfg.webpushVapidSubject;
       };
       serviceConfig = {
         User = "root";

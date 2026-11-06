@@ -5,6 +5,64 @@
 use anyhow::{Result, bail};
 use serde_json::Value;
 
+pub struct D1Database {
+    pub account_id: String,
+    pub database_id: String,
+    pub api_token: String,
+}
+
+impl D1Database {
+    pub fn new(account_id: &str, database_id: &str, api_token: &str) -> Self {
+        Self {
+            account_id: account_id.to_string(),
+            database_id: database_id.to_string(),
+            api_token: api_token.to_string(),
+        }
+    }
+
+    /// 查询 Cloudflare D1 数据库
+    pub async fn query(&self, sql: &str) -> Result<Vec<Value>> {
+        let account_id = self.account_id.as_str();
+        let database_id = self.database_id.as_str();
+        let api_token = self.api_token.as_str();
+        let query_url = format!(
+            "https://api.cloudflare.com/client/v4/accounts/{account_id}/d1/database/{database_id}/query"
+        );
+
+        let payload = serde_json::json!({
+            "sql": sql,
+        });
+
+        let client = reqwest::Client::new();
+        let resp: Value = client
+            .post(&query_url)
+            .header("Authorization", format!("Bearer {api_token}"))
+            .header("Content-Type", "application/json")
+            .json(&payload)
+            .timeout(std::time::Duration::from_secs(20))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        if resp.get("success").and_then(|v| v.as_bool()) != Some(true) {
+            let errors = &resp["errors"];
+            bail!("D1 query failed: {errors}");
+        }
+
+        let rows = resp
+            .get("result")
+            .and_then(|r| r.as_array())
+            .and_then(|arr| arr.first())
+            .and_then(|first| first.get("results"))
+            .and_then(|r| r.as_array())
+            .cloned()
+            .unwrap_or_default();
+
+        Ok(rows)
+    }
+}
+
 /// 查询 Cloudflare D1 数据库
 pub async fn d1_query(
     account_id: &str,
