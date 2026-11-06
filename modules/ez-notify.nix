@@ -40,7 +40,7 @@ in {
 
     webpushVapidSubject = mkOption {
       type = types.str;
-      default = "mailto:admin@example.com"
+      default = "mailto:admin@example.com";
       description = "D1 database ID, not the database name.";
     };
   };
